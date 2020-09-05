@@ -5,15 +5,8 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent
 
-import numpy
-import torch
-from transformers import AutoTokenizer, AutoModel
-
 import configparser
-
-bert_name = "hfl/chinese-bert-wwm-ext"
-tokenizer = AutoTokenizer.from_pretrained(bert_name)
-embedding = AutoModel.from_pretrained(bert_name)
+from transformer import Bert
 
 app = Flask(__name__)
 
@@ -23,6 +16,9 @@ config.read('config.ini')
 
 line_bot_api = LineBotApi(config.get('line-bot', 'channel_access_token'))
 handler = WebhookHandler(config.get('line-bot', 'channel_secret'))
+
+# 這個bert會根據用戶所說的話推薦對應的產品
+bert = Bert()
 
 # 接收 LINE 的資訊
 @app.route("/callback", methods=['POST'])
@@ -46,7 +42,8 @@ def handle_text_message(event):
         # user_message是使用者說的話
         user_message = event.message.text
         # reply_message就是bot要回傳的話，這裡設定成回傳使用者說的話
-        reply_message = user_message
+        #reply_message = user_message
+        reply_message = bert.predict(user_message)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
