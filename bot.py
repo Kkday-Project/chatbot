@@ -35,14 +35,13 @@ def callback():
 
     return 'OK'
 
-# 學你說話
+# 回覆用戶
 @handler.add(MessageEvent, message=TextMessage)
 def handle_text_message(event):
     if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
         # user_message是使用者說的話
         user_message = event.message.text
-        # reply_message就是bot要回傳的話，這裡設定成回傳使用者說的話
-        #reply_message = user_message
+        # reply_message就是bot要回傳的話
         reply_message = bert.predict(user_message)
         line_bot_api.reply_message(
             event.reply_token,
