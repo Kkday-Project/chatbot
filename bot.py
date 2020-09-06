@@ -42,7 +42,7 @@ def handle_text_message(event):
         # user_message是使用者說的話
         user_message = event.message.text
         # reply_message就是bot要回傳的話
-        reply_message = bert.predict(user_message)
+        reply_message = "為您推薦:" + bert.predict(user_message)
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
