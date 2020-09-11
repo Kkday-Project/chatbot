@@ -19,7 +19,7 @@ line_bot_api = LineBotApi(config.get('line-bot', 'channel_access_token'))
 handler = WebhookHandler(config.get('line-bot', 'channel_secret'))
 
 # 這個bert會根據用戶所說的話推薦對應的產品
-bert = Bert(max_len=20)
+bert = Bert(max_len=10)
 prod_df = pd.read_csv("./all_product_info.csv", encoding = 'utf-8')
 
 # 接收 LINE 的資訊
