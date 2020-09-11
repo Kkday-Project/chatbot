@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import os
+import pandas as pd
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -18,7 +19,8 @@ line_bot_api = LineBotApi(config.get('line-bot', 'channel_access_token'))
 handler = WebhookHandler(config.get('line-bot', 'channel_secret'))
 
 # 這個bert會根據用戶所說的話推薦對應的產品
-bert = Bert()
+bert = Bert(max_len=20)
+prod_df = pd.read_csv("./all_product_info.csv", encoding = 'utf-8')
 
 # 接收 LINE 的資訊
 @app.route("/callback", methods=['POST'])
@@ -41,8 +43,12 @@ def handle_text_message(event):
     if event.source.user_id != "Udeadbeefdeadbeefdeadbeefdeadbeef":
         # user_message是使用者說的話
         user_message = event.message.text
+        # 這裡將predict出來的產品id轉換成產品名稱 + 對應連結
+        best_prod_id = bert.predict(user_message)
+        link = 'https://www.kkday.com/zh-tw/product/' + str(best_prod_id)
+        product_title = prod_df[prod_df["product_id"] == best_prod_id]["title"].to_numpy()[0]
         # reply_message就是bot要回傳的話
-        reply_message = "為您推薦:" + bert.predict(user_message)
+        reply_message = "為您推薦:" + product_title + "\n" + link
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=reply_message)
