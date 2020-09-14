@@ -7,7 +7,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 
 class Bert():
-    def __init__(self, bert_name="hfl/chinese-bert-wwm-ext", max_len=10):
+    def __init__(self, bert_name="hfl/chinese-bert-wwm-ext", max_len=30):
         self.max_len = max_len
         self.prod_embedding = None
         self.tokenizer = AutoTokenizer.from_pretrained(bert_name)

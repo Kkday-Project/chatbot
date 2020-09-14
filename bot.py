@@ -1,13 +1,13 @@
 from __future__ import unicode_literals
-import os
+
 import pandas as pd
+import configparser
+from transformer import Bert
+
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, FollowEvent
-
-import configparser
-from transformer import Bert
 
 app = Flask(__name__)
 
@@ -19,7 +19,7 @@ line_bot_api = LineBotApi(config.get('line-bot', 'channel_access_token'))
 handler = WebhookHandler(config.get('line-bot', 'channel_secret'))
 
 # 這個bert會根據用戶所說的話推薦對應的產品
-bert = Bert(max_len=10)
+bert = Bert(max_len=30)
 prod_df = pd.read_csv("./all_product_info.csv", encoding = 'utf-8')
 
 # 接收 LINE 的資訊
