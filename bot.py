@@ -1,5 +1,9 @@
 from __future__ import unicode_literals
-import os
+
+import pandas as pd
+import configparser
+from transformer import Bert
+
 from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
