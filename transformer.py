@@ -41,7 +41,8 @@ class Bert():
             if score > max_score:
                 max_score = score
                 best_proc = proc_id
-
+        link = 'https://www.kkday.com/zh-tw/product/' + str(best_proc)
         best_proc_title = self.proc_df[self.proc_df["product_id"] == best_proc]["title"].to_numpy()[0]
         #print(max_score)
-        return best_proc_title
+        return str(max_score) + best_proc_title + "\n" + link  
+        
