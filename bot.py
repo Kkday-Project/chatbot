@@ -61,7 +61,7 @@ def handle_text_message(event):
 # 第一次加好友會說的話
 @handler.add(FollowEvent)
 def handle_add_friend(event):
-    line_bot_api.push_message(event.source.user_id, reply.introduction())
+    line_bot_api.push_message(event.source.user_id, reply.introduction(event.source.user_id))
 
 if __name__ == "__main__":
     app.run()
