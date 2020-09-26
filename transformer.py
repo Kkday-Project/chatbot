@@ -10,9 +10,10 @@ class Bert():
     def __init__(self, bert_name="hfl/chinese-bert-wwm-ext", max_len=30):
         self.max_len = max_len
         self.prod_embedding = None
+        self.cos = torch.nn.CosineSimilarity(dim=1)
+        self.prod_df = pd.read_csv("./all_product_info.csv")
         self.tokenizer = AutoTokenizer.from_pretrained(bert_name)
         self.bert_model = AutoModel.from_pretrained(bert_name)
-        self.cos = torch.nn.CosineSimilarity(dim=1)
 
     def sent_padding(self, sent_token):
         padding = [sent_token[:self.max_len-1] + [102]] if len(sent_token) >= self.max_len \
@@ -35,7 +36,7 @@ class Bert():
 
         return word_vec
 
-    def predict(self, sent, embedding_dir = "./product_embedding.npy"):
+    def predict(self, sent, max_id_list=None, embedding_dir = "./product_embedding.npy"):
 
         if self.prod_embedding is None:
             try:
@@ -55,11 +56,12 @@ class Bert():
             prod_id = prod[0]
             prod_emb = prod[1]
             score = float(self.cos(torch.tensor(emb_vec), torch.tensor(prod_emb)))
-            if score > max_score:
+            if (max_id_list is not None and prod_id not in max_id_list):
+                continue
+            elif score > max_score:
                 max_score = score
-                best_proc = proc_id
-        link = 'https://www.kkday.com/zh-tw/product/' + str(best_proc)
-        best_proc_title = self.proc_df[self.proc_df["product_id"] == best_proc]["title"].to_numpy()[0]
-        #print(max_score)
-        return str(max_score) + best_proc_title + "\n" + link  
-        
+                best_prod = prod_id
+        link = 'https://www.kkday.com/zh-tw/product/' + str(best_prod)
+        best_prod_title = self.prod_df[self.prod_df["product_id"] == best_prod]["title"].to_numpy()[0]
+
+        return best_prod_title + "\n" + link  
