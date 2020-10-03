@@ -22,16 +22,19 @@ info = pd.read_csv('all_product_info.csv',encoding = 'utf-8')
 word_score_dict = np.load('word_score_dict.npy',allow_pickle='TRUE').item()
 template_list = ['行程推薦','地區資訊查詢','旅遊提醒','線上專人服務']
 
+exchange_rate_df = pd.read_excel('匯率表.xlsx')
+safety_df = pd.read_excel('旅遊安全表.xlsx')
+
+
 # key 為 我們定義的 value[0] 為回復 value[1] 為狀態
 template_reply_dict = {
         template_list[0]:'您好，請問您目前有任何想法嗎?', #行程推薦
-        template_list[1]:'您好，請問您想查詢哪個地區的資訊',
+        template_list[1]:'您好，請問您想查詢哪個國家的資訊',
         template_list[2]:'您在10/20 台北社子島 寬板滑水＋快艇衝浪＋沙發衝浪 的行程，注意事項如下\n請穿著輕便服裝、合身泳裝、衝浪褲或排汗快乾材質衣物\n請於所選梯次前 20 分鐘報到\n請自行準備防曬用品、防磨衣、換洗用乾淨衣物、毛巾\n近視 400 度以上旅客需配戴隱形眼鏡\n下雨可照常體驗，發生打雷、閃電將暫停活動\n行程包含劇烈運動，不建議孕婦，身心障礙人士，傷患與病患參加\n\n當天天氣為 晴天 ，可以攜帶防曬前往。',
         template_list[3]:'請問您遇到了甚麼問題?'
     }
 
 state_reply_dict = {
-        template_list[1]:'目前資料還沒連起來XD',
         template_list[3]:'造成您的不便非常抱歉，會有專員立即回覆您，請稍等。'
     }
 
@@ -75,6 +78,21 @@ def keywordSearch(text, rank_ratio=0.5):
 
     return reply_message
 
+def locationSearch(user_message):
+
+    for location, currency, bank, rate in zip(exchange_rate_df['國家'],exchange_rate_df['外幣'],exchange_rate_df['最佳銀行'],exchange_rate_df['現金賣出']): # (地區)
+        if user_message == location or location in user_message :
+            reply_message = str(currency) +'目前在' +str(bank)+'的匯率最好，現金賣出為'+ str(rate)+'\n'+'目前該地區旅遊警示為 紅色警示-不宜前往，宜儘速離境'
+            return reply_message
+    
+    for location, currency, bank, rate in zip(exchange_rate_df['國家'],exchange_rate_df['外幣'],exchange_rate_df['最佳銀行'],exchange_rate_df['現金賣出']): # (地區)
+        if location[0] in user_message:
+            reply_message = str(currency) +'目前在' +str(bank)+'的匯率最好，現金賣出為'+ str(rate)+'\n'+'目前該地區旅遊警示為 紅色警示-不宜前往，宜儘速離境'
+            return reply_message
+
+    reply_message = '目前查不到'+user_message+'的資料'
+    return reply_message
+
 def reply(user_message, user):
     reply_message = str()
     if user_message in template_list:
@@ -89,6 +107,11 @@ def reply(user_message, user):
     elif user in user_state and user_state[user] == template_list[0]: # 行程推薦   (多階段問答就要再寫...)
         user_state[user] = 0
         reply_message = keywordSearch(user_message)
+
+    elif user in user_state and user_state[user] == template_list[1]: # 行程推薦   (多階段問答就要再寫...)
+        user_state[user] = 0
+        reply_message = locationSearch(user_message)
+
     else:
         reply_message = 0
 
